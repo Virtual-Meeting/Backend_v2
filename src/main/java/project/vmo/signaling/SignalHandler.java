@@ -12,10 +12,14 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import project.vmo.domain.UserSession;
+import project.vmo.dto.IceCandidateDto;
+import project.vmo.Service.IceCandidateService;
 import project.vmo.dto.CreateRoomDto;
+import project.vmo.dto.JoinRoomDto;
 import project.vmo.Service.RoomService;
 import project.vmo.session.SessionRepository;
 import project.vmo.util.MessageCreator;
+import project.vmo.util.MessageParser;
 
 import java.io.IOException;
 
@@ -25,10 +29,13 @@ public class SignalHandler extends TextWebSocketHandler {
     private static final Gson gson = new GsonBuilder().create();
 
     private final SessionRepository sessionRegistry;
+    private final IceCandidateService iceCandidateService;
     private final RoomService roomService;
 
-    public SignalHandler(SessionRepository sessionRegistry, RoomService roomService) {
+    public SignalHandler(SessionRepository sessionRegistry, IceCandidateService iceCandidateService,
+                         RoomService roomService) {
         this.sessionRegistry = sessionRegistry;
+        this.iceCandidateService = iceCandidateService;
         this.roomService = roomService;
     }
 
@@ -53,6 +60,12 @@ public class SignalHandler extends TextWebSocketHandler {
             case CREATE_ROOM:
                 handleCreateRoom(session, requestMessage);
                 break;
+            case JOIN_ROOM:
+                handleJoinRoom(session, requestMessage);
+                break;
+            case ICE_CANDIDATE:
+                handleIceCandidate(session, requestMessage);
+                break;
             default:
                 break;
         }
@@ -69,5 +82,20 @@ public class SignalHandler extends TextWebSocketHandler {
         CreateRoomDto createRoomDto = gson.fromJson(jsonMessage, CreateRoomDto.class);
         UserSession newUserSession = roomService.createRoom(session, createRoomDto);
         sessionRegistry.register(newUserSession);
+    }
+
+    private void handleJoinRoom(WebSocketSession session, JsonObject jsonMessage) {
+        JoinRoomDto joinRoomDto = gson.fromJson(jsonMessage, JoinRoomDto.class);
+        UserSession newUserSession = roomService.joinRoom(session, joinRoomDto);
+        sessionRegistry.register(newUserSession);
+    }
+
+    private void handleIceCandidate(WebSocketSession session, JsonObject jsonMessage) throws IOException {
+        UserSession userSession = sessionRegistry.getBySession(session);
+
+        if (userSession != null) {
+            IceCandidateDto iceCandidateDto = MessageParser.parseIceCandidateRequest(jsonMessage);
+            iceCandidateService.addCandidate(userSession, iceCandidateDto);
+        }
     }
 }
