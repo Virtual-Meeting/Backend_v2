@@ -14,6 +14,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import project.vmo.domain.UserSession;
 import project.vmo.dto.IceCandidateDto;
 import project.vmo.Service.IceCandidateService;
+import project.vmo.Service.ReceiveVideoService;
 import project.vmo.dto.CreateRoomDto;
 import project.vmo.dto.JoinRoomDto;
 import project.vmo.Service.RoomService;
@@ -30,12 +31,14 @@ public class SignalHandler extends TextWebSocketHandler {
 
     private final SessionRepository sessionRegistry;
     private final IceCandidateService iceCandidateService;
+    private final ReceiveVideoService receiveVideoService;
     private final RoomService roomService;
 
     public SignalHandler(SessionRepository sessionRegistry, IceCandidateService iceCandidateService,
-                         RoomService roomService) {
+                         ReceiveVideoService receiveVideoService, RoomService roomService) {
         this.sessionRegistry = sessionRegistry;
         this.iceCandidateService = iceCandidateService;
+        this.receiveVideoService = receiveVideoService;
         this.roomService = roomService;
     }
 
@@ -65,6 +68,9 @@ public class SignalHandler extends TextWebSocketHandler {
                 break;
             case ICE_CANDIDATE:
                 handleIceCandidate(session, requestMessage);
+                break;
+            case RECEIVE_VIDEO:
+                handleReceiveVideo(session, requestMessage);
                 break;
             default:
                 break;
@@ -96,6 +102,17 @@ public class SignalHandler extends TextWebSocketHandler {
         if (userSession != null) {
             IceCandidateDto iceCandidateDto = MessageParser.parseIceCandidateRequest(jsonMessage);
             iceCandidateService.addCandidate(userSession, iceCandidateDto);
+        }
+    }
+
+    private void handleReceiveVideo(WebSocketSession session, JsonObject jsonMessage) {
+        String videoSenderSessionId = jsonMessage.get("sessionId").getAsString();
+
+        UserSession receiver = sessionRegistry.getBySession(session);
+        UserSession sender = sessionRegistry.getBySessionId(videoSenderSessionId);
+
+        if (receiver != null) {
+            receiveVideoService.receiveVideo(receiver, sender, jsonMessage);
         }
     }
 }
