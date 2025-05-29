@@ -66,6 +66,24 @@ public class MessageCreator {
         return candidateMessage;
     }
 
+    public static JsonObject createCandidateMessage(IceCandidateFoundEvent event, UserSession sender) {
+        JsonObject candidateMessage = new JsonObject();
+        candidateMessage.addProperty("action", "onIceCandidate");
+        candidateMessage.addProperty("sessionId", sender.getSession().getId());
+        candidateMessage.addProperty("username", sender.getUsername());
+        candidateMessage.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
+        return candidateMessage;
+    }
+
+    public static JsonObject createReceiveVideoMessage(UserSession sender, String ipSdpAnswer) {
+        final JsonObject receiveVideoMessage = new JsonObject();
+        receiveVideoMessage.addProperty("action", "receiveVideoFrom");
+        receiveVideoMessage.addProperty("sessionId", sender.getSession().getId());
+        receiveVideoMessage.addProperty("username", sender.getUsername());
+        receiveVideoMessage.addProperty("sdpAnswer", ipSdpAnswer);
+        return receiveVideoMessage;
+    }
+
     public static JsonObject createErrorMessage(IllegalArgumentException e) {
         JsonObject errorMessage = new JsonObject();
         errorMessage.addProperty("type", "ERROR");
