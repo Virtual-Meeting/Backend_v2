@@ -2,9 +2,14 @@ package project.vmo.util;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.kurento.client.IceCandidateFoundEvent;
+import org.kurento.jsonrpc.JsonUtils;
+import org.springframework.web.socket.WebSocketSession;
 import project.vmo.domain.UserSession;
 import project.vmo.dto.CreateRoomDto;
 import project.vmo.domain.Room;
+
+import java.io.IOException;
 
 public class MessageCreator {
     public static JsonObject createRoomCreatedMessage(CreateRoomDto dto, UserSession user, Room room) {
@@ -52,7 +57,23 @@ public class MessageCreator {
         return participantListMessage;
     }
 
+    public static JsonObject createCandidateMessage(IceCandidateFoundEvent event, WebSocketSession session, String username) {
+        JsonObject candidateMessage = new JsonObject();
+        candidateMessage.addProperty("action", "onIceCandidate");
+        candidateMessage.addProperty("sessionId", session.getId());
+        candidateMessage.addProperty("username", username);
+        candidateMessage.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
+        return candidateMessage;
+    }
+
     public static JsonObject createErrorMessage(IllegalArgumentException e) {
+        JsonObject errorMessage = new JsonObject();
+        errorMessage.addProperty("type", "ERROR");
+        errorMessage.addProperty("message", e.getMessage());
+        return errorMessage;
+    }
+
+    public static JsonObject createErrorMessage(IOException e) {
         JsonObject errorMessage = new JsonObject();
         errorMessage.addProperty("type", "ERROR");
         errorMessage.addProperty("message", e.getMessage());
