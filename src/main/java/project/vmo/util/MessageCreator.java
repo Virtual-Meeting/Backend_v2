@@ -18,4 +18,11 @@ public class MessageCreator {
         roomCreatedMessage.addProperty("videoOn", user.getIsVideoOn());
         return roomCreatedMessage;
     }
+
+    public static JsonObject createErrorMessage(IllegalArgumentException e) {
+        JsonObject errorMessage = new JsonObject();
+        errorMessage.addProperty("type", "ERROR");
+        errorMessage.addProperty("message", e.getMessage());
+        return errorMessage;
+    }
 }
