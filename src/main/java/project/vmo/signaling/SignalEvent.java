@@ -4,7 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum SignalEvent {
-    CREATE_ROOM("createRoom");
+    CREATE_ROOM("createRoom"),
+    JOIN_ROOM("joinRoom");
 
     private final String value;
 
