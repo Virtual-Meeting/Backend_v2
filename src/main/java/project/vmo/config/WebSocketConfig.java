@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
-import project.vmo.SignalHandler;
+import project.vmo.signaling.SignalHandler;
 
 @Configuration
 @EnableWebSocket
@@ -21,6 +21,9 @@ public class WebSocketConfig implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(signalHandler, "")
-                .setAllowedOrigins("https://localhost:3000", "http://localhost:3000", "https://vtestmo.kro.kr", "https://frontend-deploy-test-rosy.vercel.app");
+                .setAllowedOrigins("https://localhost:3000", "http://localhost:3000",
+                        "https://vtestmo.kro.kr",
+                        "https://frontend-deploy-test-rosy.vercel.app",
+                        "https://front-v2-develop-test.vercel.app");
     }
 }
