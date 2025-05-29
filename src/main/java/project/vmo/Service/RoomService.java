@@ -1,6 +1,9 @@
 package project.vmo.Service;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.kurento.client.KurentoClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +13,7 @@ import project.vmo.util.MessageCreator;
 import project.vmo.domain.UserSession;
 import project.vmo.session.UserSessionFactory;
 import project.vmo.dto.CreateRoomDto;
+import project.vmo.dto.JoinRoomDto;
 import project.vmo.domain.Room;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,6 +49,17 @@ public class RoomService {
         return newUser;
     }
 
+    public UserSession joinRoom(WebSocketSession session, JoinRoomDto dto) {
+        Room room = getRoomById(dto.roomId());
+
+        UserSession newUser = userSessionFactory.create(dto.username(), room.getRoomId(), dto.audioState(), dto.videoState(), session, room.getPipeline());
+        notifyNewUserJoined(newUser);
+        room.addParticipant(newUser);
+
+        sendExistingParticipantsList(newUser);
+        return newUser;
+    }
+
     private void notifyNewUserJoined(UserSession newUser) {
         Room room = getRoomById(newUser.getRoomId());
         JsonObject message = MessageCreator.createNewUserJoinedMessage(newUser);
@@ -54,6 +69,24 @@ public class RoomService {
         for (UserSession participant : room.getParticipants()) {
             SendService.sendMessage(participant.getSession(), message);
         }
+    }
+
+    private void sendExistingParticipantsList(UserSession user) {
+        Room room = getRoomById(user.getRoomId());
+        JsonArray participantArray = new JsonArray();
+
+        for (UserSession participant : room.getParticipants()) {
+            if (!participant.equals(user)) {
+                JsonObject participantInfo = MessageCreator.createParticipantInfoMessage(participant);
+                JsonElement jsonElement = new JsonPrimitive(participantInfo.toString());
+                participantArray.add(jsonElement);
+            }
+        }
+
+        JsonObject message = MessageCreator.createParticipantListMessage(user, participantArray, room);
+        log.debug("참가자 {} / {} 에게 {}명의 기존 참가자 목록 전송", user.getUsername(), user.getSession().getId(), participantArray.size());
+
+        SendService.sendMessage(user.getSession(), message);
     }
 
     public Room getRoomById(String roomId) {
