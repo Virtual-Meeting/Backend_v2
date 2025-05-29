@@ -5,7 +5,8 @@ import lombok.Getter;
 @Getter
 public enum SignalEvent {
     CREATE_ROOM("createRoom"),
-    JOIN_ROOM("joinRoom");
+    JOIN_ROOM("joinRoom"),
+    ICE_CANDIDATE("onIceCandidate");
 
     private final String value;
 
