@@ -7,7 +7,10 @@ public enum SignalEvent {
     CREATE_ROOM("createRoom"),
     JOIN_ROOM("joinRoom"),
     ICE_CANDIDATE("onIceCandidate"),
-    RECEIVE_VIDEO("receiveVideoAnswer");
+    RECEIVE_VIDEO("receiveVideoAnswer"),
+    SEND_EMOJI("sendPublicEmoji"),
+    BROADCAST_CHAT("broadcastChat"),
+    SEND_PERSONAL_CHAT("sendPersonalChat");
 
     private final String value;
 
