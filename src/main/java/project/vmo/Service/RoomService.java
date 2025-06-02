@@ -38,7 +38,7 @@ public class RoomService {
 
         log.info("사용자 {} / {} 가 방 {} 을 생성했습니다.", dto.username(), session.getId(), room.getRoomId());
 
-        UserSession newUser = userSessionFactory.create(dto.username(), room.getRoomId(), dto.audioState(), dto.videoState(), session, room.getPipeline());
+        UserSession newUser = userSessionFactory.create(dto.username(), room.getRoomId(), dto.audioOn(), dto.videoOn(), session, room.getPipeline());
         notifyNewUserJoined(newUser);
         room.addParticipant(newUser);
         room.changeRoomLeader(session.getId(), dto.username());
@@ -52,7 +52,7 @@ public class RoomService {
     public UserSession joinRoom(WebSocketSession session, JoinRoomDto dto) {
         Room room = getRoomById(dto.roomId());
 
-        UserSession newUser = userSessionFactory.create(dto.username(), room.getRoomId(), dto.audioState(), dto.videoState(), session, room.getPipeline());
+        UserSession newUser = userSessionFactory.create(dto.username(), room.getRoomId(), dto.audioOn(), dto.videoOn(), session, room.getPipeline());
         notifyNewUserJoined(newUser);
         room.addParticipant(newUser);
 
@@ -64,7 +64,7 @@ public class RoomService {
         Room room = getRoomById(newUser.getRoomId());
         JsonObject message = MessageCreator.createNewUserJoinedMessage(newUser);
 
-        log.debug("ROOM {}: 새로운 참가자 {} / {} 입장 알림 전송 중", newUser.getRoomId(), newUser.getUsername(), newUser.getSession().getId());
+        log.debug("방 {}: 새로운 참가자 {} / {} 입장 알림 전송", newUser.getRoomId(), newUser.getUsername(), newUser.getSession().getId());
 
         for (UserSession participant : room.getParticipants()) {
             SendService.sendMessage(participant.getSession(), message);
@@ -77,7 +77,7 @@ public class RoomService {
 
         for (UserSession participant : room.getParticipants()) {
             if (!participant.equals(user)) {
-                JsonObject participantInfo = MessageCreator.createParticipantInfoMessage(participant);
+                JsonObject participantInfo = MessageCreator.createParticipantInfo(participant);
                 JsonElement jsonElement = new JsonPrimitive(participantInfo.toString());
                 participantArray.add(jsonElement);
             }
