@@ -35,7 +35,7 @@ public class MessageCreator {
         return newUserJoinedMessage;
     }
 
-    public static JsonObject createParticipantInfoMessage(UserSession user) {
+    public static JsonObject createParticipantInfo(UserSession user) {
         JsonObject participantInfo = new JsonObject();
         participantInfo.addProperty("sessionId", user.getSession().getId());
         participantInfo.addProperty("username", user.getUsername());
@@ -44,12 +44,12 @@ public class MessageCreator {
         return participantInfo;
     }
 
-    public static JsonObject createParticipantListMessage(UserSession user, JsonArray array, Room room) {
+    public static JsonObject createParticipantListMessage(UserSession user, JsonArray participants, Room room) {
         JsonObject participantListMessage = new JsonObject();
         participantListMessage.addProperty("action", "sendExistingUsers");
         participantListMessage.addProperty("sessionId", user.getSession().getId());
         participantListMessage.addProperty("username", user.getUsername());
-        participantListMessage.add("participants", array);
+        participantListMessage.add("participants", participants);
         participantListMessage.addProperty("roomLeaderId", room.getLeaderSessionId());
         participantListMessage.addProperty("roomLeaderName", room.getLeaderName());
         participantListMessage.addProperty("audioOn", user.getIsAudioOn());
@@ -75,13 +75,44 @@ public class MessageCreator {
         return candidateMessage;
     }
 
-    public static JsonObject createReceiveVideoMessage(UserSession sender, String ipSdpAnswer) {
+    public static JsonObject createReceiveVideoMessage(UserSession sender, String sdpAnswer) {
         final JsonObject receiveVideoMessage = new JsonObject();
-        receiveVideoMessage.addProperty("action", "receiveVideoFrom");
+        receiveVideoMessage.addProperty("action", "receiveVideoAnswer");
         receiveVideoMessage.addProperty("sessionId", sender.getSession().getId());
         receiveVideoMessage.addProperty("username", sender.getUsername());
-        receiveVideoMessage.addProperty("sdpAnswer", ipSdpAnswer);
+        receiveVideoMessage.addProperty("sdpAnswer", sdpAnswer);
         return receiveVideoMessage;
+    }
+
+    public static JsonObject createEmojiMessage(UserSession senderSession, String emoji, UserSession receiverSession) {
+        JsonObject emojiMessage = new JsonObject();
+        emojiMessage.addProperty("action", "sendPublicEmoji");
+        emojiMessage.addProperty("senderSessionId", senderSession.getSession().getId());
+        emojiMessage.addProperty("senderName", senderSession.getUsername());
+        emojiMessage.addProperty("receiverSessionId", receiverSession.getSession().getId());
+        emojiMessage.addProperty("receiverName", receiverSession.getUsername());
+        emojiMessage.addProperty("emoji", emoji);
+        return emojiMessage;
+    }
+
+    public static JsonObject createBroadcastChatMessage(UserSession senderSession, String message) {
+        JsonObject chatMessage = new JsonObject();
+        chatMessage.addProperty("action", "broadcastChat");
+        chatMessage.addProperty("senderSessionId", senderSession.getSession().getId());
+        chatMessage.addProperty("senderName", senderSession.getUsername());
+        chatMessage.addProperty("message", message);
+        return chatMessage;
+    }
+
+    public static JsonObject createPersonalChatMessage(UserSession senderSession, UserSession receiverSession, String message) {
+        JsonObject chatMessage = new JsonObject();
+        chatMessage.addProperty("action", "sendPersonalChat");
+        chatMessage.addProperty("senderSessionId", senderSession.getSession().getId());
+        chatMessage.addProperty("senderName", senderSession.getUsername());
+        chatMessage.addProperty("receiverSessionId", receiverSession.getSession().getId());
+        chatMessage.addProperty("receiverName", receiverSession.getUsername());
+        chatMessage.addProperty("message", message);
+        return chatMessage;
     }
 
     public static JsonObject createErrorMessage(IllegalArgumentException e) {

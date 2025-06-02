@@ -8,6 +8,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import project.vmo.domain.Room;
 import project.vmo.domain.UserSession;
+import project.vmo.util.MessageCreator;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -25,6 +26,7 @@ public class SendService {
         try {
             synchronized (session) {
                 session.sendMessage(new TextMessage(message.toString()));
+                log.info("전송한 메시지: {}", message);
             }
         } catch (IOException e) {
             log.warn("메시지 전송 실패: {}", e.getMessage());
@@ -36,13 +38,7 @@ public class SendService {
         Collection<UserSession> receiverSessions = room.getParticipants();
 
         receiverSessions.forEach(receiverSession -> {
-            JsonObject emojiMessage = new JsonObject();
-            emojiMessage.addProperty("action", "sendPublicEmoji");
-            emojiMessage.addProperty("senderSessionId", senderSession.getSession().getId());
-            emojiMessage.addProperty("senderName", senderSession.getUsername());
-            emojiMessage.addProperty("receiverSessionId", receiverSession.getSession().getId());
-            emojiMessage.addProperty("receiverName", receiverSession.getUsername());
-            emojiMessage.addProperty("emoji", emoji);
+            JsonObject emojiMessage = MessageCreator.createEmojiMessage(senderSession, emoji, receiverSession);
             sendMessage(receiverSession.getSession(), emojiMessage);
         });
     }
@@ -51,11 +47,7 @@ public class SendService {
         Room room = roomService.getRoomById(senderSession.getRoomId());
         Collection<UserSession> receiverSessions = room.getParticipants();
 
-        JsonObject chatMessage = new JsonObject();
-        chatMessage.addProperty("action", "broadcastChat");
-        chatMessage.addProperty("senderSessionId", senderSession.getSession().getId());
-        chatMessage.addProperty("senderName", senderSession.getUsername());
-        chatMessage.addProperty("message", message);
+        JsonObject chatMessage = MessageCreator.createBroadcastChatMessage(senderSession, message);
 
         receiverSessions.forEach(userSession -> {
             if (!userSession.getSession().getId().equals(senderSession.getSession().getId())) {
@@ -65,13 +57,7 @@ public class SendService {
     }
 
     public void sendPersonalChat(UserSession senderSession, UserSession receiverSession, String message) {
-        JsonObject chatMessage = new JsonObject();
-        chatMessage.addProperty("action", "sendPersonalChat");
-        chatMessage.addProperty("senderSessionId", senderSession.getSession().getId());
-        chatMessage.addProperty("senderName", senderSession.getUsername());
-        chatMessage.addProperty("receiverSessionId", receiverSession.getSession().getId());
-        chatMessage.addProperty("receiverName", receiverSession.getUsername());
-        chatMessage.addProperty("message", message);
+        JsonObject chatMessage = MessageCreator.createPersonalChatMessage(senderSession, receiverSession, message);
 
         sendMessage(receiverSession.getSession(), chatMessage);
     }
