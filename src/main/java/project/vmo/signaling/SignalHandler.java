@@ -33,13 +33,16 @@ public class SignalHandler extends TextWebSocketHandler {
     private final IceCandidateService iceCandidateService;
     private final ReceiveVideoService receiveVideoService;
     private final RoomService roomService;
+    private final SendService sendService;
 
     public SignalHandler(SessionRepository sessionRegistry, IceCandidateService iceCandidateService,
-                         ReceiveVideoService receiveVideoService, RoomService roomService) {
+                         ReceiveVideoService receiveVideoService, RoomService roomService,
+                         SendService sendService) {
         this.sessionRegistry = sessionRegistry;
         this.iceCandidateService = iceCandidateService;
         this.receiveVideoService = receiveVideoService;
         this.roomService = roomService;
+        this.sendService = sendService;
     }
 
     @Override
@@ -71,6 +74,15 @@ public class SignalHandler extends TextWebSocketHandler {
                 break;
             case RECEIVE_VIDEO:
                 handleReceiveVideo(session, requestMessage);
+                break;
+            case SEND_EMOJI:
+                handleSendEmoji(session, requestMessage);
+                break;
+            case BROADCAST_CHAT:
+                handleBroadcastChat(session, requestMessage);
+                break;
+            case SEND_PERSONAL_CHAT:
+                handleSendPersonalChat(session, requestMessage);
                 break;
             default:
                 break;
@@ -114,5 +126,26 @@ public class SignalHandler extends TextWebSocketHandler {
         if (receiver != null) {
             receiveVideoService.receiveVideo(receiver, sender, jsonMessage);
         }
+    }
+
+    private void handleSendEmoji(WebSocketSession session, JsonObject jsonMessage) {
+        String emoji = jsonMessage.get("emoji").getAsString();
+        UserSession senderSession = sessionRegistry.getBySession(session);
+        sendService.sendPublicEmoji(senderSession, emoji);
+    }
+
+    private void handleBroadcastChat(WebSocketSession session, JsonObject jsonMessage) {
+        String message = jsonMessage.get("message").getAsString();
+        UserSession senderSession = sessionRegistry.getBySession(session);
+        sendService.broadcastChat(senderSession, message);
+    }
+
+    private void handleSendPersonalChat(WebSocketSession session, JsonObject jsonMessage) {
+        String message = jsonMessage.get("message").getAsString();
+        String receiverSessionId = jsonMessage.get("receiverSessionId").getAsString();
+
+        UserSession senderSession = sessionRegistry.getBySession(session);
+        UserSession receiverSession = sessionRegistry.getBySessionId(receiverSessionId);
+        sendService.sendPersonalChat(senderSession, receiverSession, message);
     }
 }
