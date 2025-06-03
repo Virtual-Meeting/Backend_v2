@@ -1,8 +1,10 @@
 package project.vmo.domain;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.kurento.client.Continuation;
 import org.kurento.client.MediaPipeline;
+import org.kurento.client.RecorderEndpoint;
 import org.kurento.client.WebRtcEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +34,9 @@ public class UserSession implements Closeable {
     private final MediaPipeline pipeline;
     @Getter
     private final WebRtcEndpoint outgoingMedia;
+    @Setter
+    @Getter
+    private RecorderEndpoint recorderEndpoint;
 
     private final ConcurrentMap<String, WebRtcEndpoint> incomingMediaBySessionId = new ConcurrentHashMap<>();
 
