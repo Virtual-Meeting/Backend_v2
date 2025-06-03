@@ -115,7 +115,20 @@ public class MessageCreator {
         return chatMessage;
     }
 
-    public static JsonObject createErrorMessage(IllegalArgumentException e) {
+    public static JsonObject createStopRecordingMessage(String action, String fileName) {
+        JsonObject stopRecordingMessage = new JsonObject();
+        stopRecordingMessage.addProperty("action", action);
+        stopRecordingMessage.addProperty("fileName", fileName);
+        return stopRecordingMessage;
+    }
+
+    public static JsonObject simple(String action) {
+        JsonObject message = new JsonObject();
+        message.addProperty("action", action);
+        return message;
+    }
+
+    public static JsonObject createErrorMessage(RuntimeException e) {
         JsonObject errorMessage = new JsonObject();
         errorMessage.addProperty("type", "ERROR");
         errorMessage.addProperty("message", e.getMessage());
