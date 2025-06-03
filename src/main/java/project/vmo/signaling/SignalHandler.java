@@ -1,6 +1,7 @@
 package project.vmo.signaling;
 
-import project.vmo.Service.SendService;
+import project.vmo.controller.RecordingDownloadController;
+import project.vmo.Service.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -13,16 +14,14 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import project.vmo.domain.UserSession;
 import project.vmo.dto.IceCandidateDto;
-import project.vmo.Service.IceCandidateService;
-import project.vmo.Service.ReceiveVideoService;
 import project.vmo.dto.CreateRoomDto;
 import project.vmo.dto.JoinRoomDto;
-import project.vmo.Service.RoomService;
 import project.vmo.session.SessionRepository;
 import project.vmo.util.MessageCreator;
 import project.vmo.util.MessageParser;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 @Component
 public class SignalHandler extends TextWebSocketHandler {
@@ -34,15 +33,17 @@ public class SignalHandler extends TextWebSocketHandler {
     private final ReceiveVideoService receiveVideoService;
     private final RoomService roomService;
     private final SendService sendService;
+    private final RecordingService recordingService;
 
     public SignalHandler(SessionRepository sessionRegistry, IceCandidateService iceCandidateService,
                          ReceiveVideoService receiveVideoService, RoomService roomService,
-                         SendService sendService) {
+                         SendService sendService, RecordingService recordingService) {
         this.sessionRegistry = sessionRegistry;
         this.iceCandidateService = iceCandidateService;
         this.receiveVideoService = receiveVideoService;
         this.roomService = roomService;
         this.sendService = sendService;
+        this.recordingService = recordingService;
     }
 
     @Override
@@ -51,7 +52,7 @@ public class SignalHandler extends TextWebSocketHandler {
 
         try {
             dispatchSignalEvent(session, message);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             handleErrorAndNotify(session, e);
         }
     }
@@ -84,12 +85,21 @@ public class SignalHandler extends TextWebSocketHandler {
             case SEND_PERSONAL_CHAT:
                 handleSendPersonalChat(session, requestMessage);
                 break;
+            case START_RECORDING:
+                handleStartRecording(session);
+                break;
+            case STOP_RECORDING:
+                handleStopRecording(session);
+                break;
+            case PAUSE_RECORDING:
+                handlePauseRecording(session);
+                break;
             default:
                 break;
         }
     }
 
-    private static void handleErrorAndNotify(WebSocketSession session, IllegalArgumentException e) {
+    private static void handleErrorAndNotify(WebSocketSession session, RuntimeException e) {
         log.error(e.getMessage());
 
         JsonObject errorMessage = MessageCreator.createErrorMessage(e);
@@ -147,5 +157,24 @@ public class SignalHandler extends TextWebSocketHandler {
         UserSession senderSession = sessionRegistry.getBySession(session);
         UserSession receiverSession = sessionRegistry.getBySessionId(receiverSessionId);
         sendService.sendPersonalChat(senderSession, receiverSession, message);
+    }
+
+    private void handleStartRecording(WebSocketSession session) {
+        UserSession userSession = sessionRegistry.getBySession(session);
+
+        String fileName = userSession.getRoomId() + "_" + LocalDateTime.now().toString().replace(":", ".");
+        String filePath = RecordingDownloadController.RECORDING_DIR + userSession.getRoomId() + "/" + fileName + ".webm";
+
+        recordingService.startRecording(userSession, filePath);
+    }
+
+    private void handleStopRecording(WebSocketSession session) {
+        UserSession user = sessionRegistry.getBySession(session);
+        recordingService.stopRecording(user);
+    }
+
+    private void handlePauseRecording(WebSocketSession session) {
+        UserSession user = sessionRegistry.getBySession(session);
+        recordingService.pauseRecording(user);
     }
 }
