@@ -122,6 +122,22 @@ public class MessageCreator {
         return stopRecordingMessage;
     }
 
+    public static JsonObject createVideoStateChangeMessage(String action, String sessionId, Boolean videoState) {
+        JsonObject videoStateChangeMessage = new JsonObject();
+        videoStateChangeMessage.addProperty("action", action);
+        videoStateChangeMessage.addProperty("sessionId", sessionId);
+        videoStateChangeMessage.addProperty("videoOn", videoState);
+        return videoStateChangeMessage;
+    }
+
+    public static JsonObject createAudioStateChangeMessage(String action, String sessionId, Boolean audioState) {
+        JsonObject audioStateChangeMessage = new JsonObject();
+        audioStateChangeMessage.addProperty("action", action);
+        audioStateChangeMessage.addProperty("sessionId", sessionId);
+        audioStateChangeMessage.addProperty("audioOn", audioState);
+        return audioStateChangeMessage;
+    }
+
     public static JsonObject simple(String action) {
         JsonObject message = new JsonObject();
         message.addProperty("action", action);
