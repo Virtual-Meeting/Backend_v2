@@ -26,9 +26,9 @@ public class UserSession implements Closeable {
     @Getter
     private final WebSocketSession session;
     @Getter
-    private final Boolean isAudioOn;
+    private Boolean isAudioOn;
     @Getter
-    private final Boolean isVideoOn;
+    private Boolean isVideoOn;
 
     @Getter
     private final MediaPipeline pipeline;
@@ -62,6 +62,18 @@ public class UserSession implements Closeable {
 
     public void addIncomingMedia(String sessionId, WebRtcEndpoint incomingMedia) {
         incomingMediaBySessionId.put(sessionId, incomingMedia);
+    }
+
+    public void changeVideoState(Boolean videoState) {
+        if (isVideoOn != videoState) {
+            this.isVideoOn = videoState;
+        } else throw new IllegalStateException("잘못된 비디오 상태 변경 요청입니다.");
+    }
+
+    public void changeAudioState(Boolean audioState) {
+        if (isAudioOn != audioState) {
+            this.isAudioOn = audioState;
+        } else throw new IllegalStateException("잘못된 오디오 상태 변경 요청입니다.");
     }
 
     @Override
