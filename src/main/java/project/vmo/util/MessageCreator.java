@@ -115,6 +115,27 @@ public class MessageCreator {
         return chatMessage;
     }
 
+    public static JsonObject createPermissionRequestMessage(String sessionId) {
+        JsonObject permissionRequestMessage = new JsonObject();
+        permissionRequestMessage.addProperty("action", "requestRecordingPermission");
+        permissionRequestMessage.addProperty("sessionId", sessionId);
+        return permissionRequestMessage;
+    }
+
+    public static JsonObject createGrantPermissionMessage(String sessionId) {
+        JsonObject grantPermissionMessage = new JsonObject();
+        grantPermissionMessage.addProperty("action", "grantPermissionMessage");
+        grantPermissionMessage.addProperty("sessionId", sessionId);
+        return grantPermissionMessage;
+    }
+
+    public static JsonObject createDenyPermissionMessage(String sessionId) {
+        JsonObject denyPermissionMessage = new JsonObject();
+        denyPermissionMessage.addProperty("action", "denyPermissionMessage");
+        denyPermissionMessage.addProperty("sessionId", sessionId);
+        return denyPermissionMessage;
+    }
+
     public static JsonObject createStopRecordingMessage(String action, String fileName) {
         JsonObject stopRecordingMessage = new JsonObject();
         stopRecordingMessage.addProperty("action", action);

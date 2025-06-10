@@ -1,6 +1,7 @@
 package project.vmo.signaling;
 
 import project.vmo.controller.RecordingDownloadController;
+import project.vmo.domain.Room;
 import project.vmo.service.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -85,6 +86,15 @@ public class SignalHandler extends TextWebSocketHandler {
             case SEND_PERSONAL_CHAT:
                 handleSendPersonalChat(session, requestMessage);
                 break;
+            case REQUEST_RECORDING_PERMISSION:
+                handleRecordingPermissionRequest(session);
+                break;
+            case GRANT_RECORDING_PERMISSION:
+                handleGrantRecordingPermission(requestMessage);
+                break;
+            case DENY_RECORDING_PERMISSION:
+                handleDenyRecordingPermission(requestMessage);
+                break;
             case START_RECORDING:
                 handleStartRecording(session);
                 break;
@@ -166,6 +176,29 @@ public class SignalHandler extends TextWebSocketHandler {
         UserSession senderSession = sessionRegistry.getBySession(session);
         UserSession receiverSession = sessionRegistry.getBySessionId(receiverSessionId);
         sendService.sendPersonalChat(senderSession, receiverSession, message);
+    }
+
+    private void handleRecordingPermissionRequest(WebSocketSession session) {
+        UserSession userSession = sessionRegistry.getBySession(session);
+        String roomId = userSession.getRoomId();
+
+        recordingService.validateRecordPermission(session.getId(), roomId);
+
+        Room room = roomService.getRoomById(roomId);
+        UserSession roomLeaderSession = sessionRegistry.getBySessionId(room.getLeaderSessionId());
+        SendService.sendMessage(roomLeaderSession.getSession(), MessageCreator.createPermissionRequestMessage(session.getId()));
+    }
+
+    private void handleGrantRecordingPermission(JsonObject jsonMessage) {
+        String sessionId = jsonMessage.get("sessionId").getAsString();
+        UserSession userSession = sessionRegistry.getBySessionId(sessionId);
+        recordingService.grantRecordingPermission(userSession);
+    }
+
+    private void handleDenyRecordingPermission(JsonObject jsonMessage) {
+        String sessionId = jsonMessage.get("sessionId").getAsString();
+        UserSession userSession = sessionRegistry.getBySessionId(sessionId);
+        SendService.sendMessage(userSession.getSession(), MessageCreator.createDenyPermissionMessage(userSession.getSession().getId()));
     }
 
     private void handleStartRecording(WebSocketSession session) {
