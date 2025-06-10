@@ -94,6 +94,12 @@ public class SignalHandler extends TextWebSocketHandler {
             case PAUSE_RECORDING:
                 handlePauseRecording(session);
                 break;
+            case AUDIO_STATE_CHANGE:
+                handleAudioStateChange(session, requestMessage);
+                break;
+            case VIDEO_STATE_CHANGE:
+                handleVideoStateChange(session, requestMessage);
+                break;
             default:
                 break;
         }
@@ -169,12 +175,26 @@ public class SignalHandler extends TextWebSocketHandler {
     }
 
     private void handleStopRecording(WebSocketSession session) {
-        UserSession user = sessionRegistry.getBySession(session);
-        recordingService.stopRecording(user);
+        UserSession userSession = sessionRegistry.getBySession(session);
+        recordingService.stopRecording(userSession);
     }
 
     private void handlePauseRecording(WebSocketSession session) {
-        UserSession user = sessionRegistry.getBySession(session);
-        recordingService.pauseRecording(user);
+        UserSession userSession = sessionRegistry.getBySession(session);
+        recordingService.pauseRecording(userSession);
+    }
+
+    private void handleVideoStateChange(WebSocketSession session, JsonObject jsonMessage) {
+        Boolean videoState = jsonMessage.get("videoOn").getAsBoolean();
+        UserSession userSession = sessionRegistry.getBySession(session);
+        userSession.changeVideoState(videoState);
+        SendService.sendMessage(session, MessageCreator.createVideoStateChangeMessage(SignalEvent.VIDEO_STATE_CHANGE.getValue(), session.getId(), videoState));
+    }
+
+    private void handleAudioStateChange(WebSocketSession session, JsonObject jsonMessage) {
+        Boolean audioState = jsonMessage.get("audioOn").getAsBoolean();
+        UserSession userSession = sessionRegistry.getBySession(session);
+        userSession.changeAudioState(audioState);
+        SendService.sendMessage(session, MessageCreator.createAudioStateChangeMessage(SignalEvent.AUDIO_STATE_CHANGE.getValue(), session.getId(), audioState));
     }
 }
