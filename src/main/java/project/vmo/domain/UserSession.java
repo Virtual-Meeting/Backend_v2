@@ -20,7 +20,7 @@ public class UserSession implements Closeable {
     private static final Logger log = LoggerFactory.getLogger(UserSession.class);
 
     @Getter
-    private final String username;
+    private String username;
     @Getter
     private final String roomId;
     @Getter
@@ -62,6 +62,10 @@ public class UserSession implements Closeable {
 
     public void addIncomingMedia(String sessionId, WebRtcEndpoint incomingMedia) {
         incomingMediaBySessionId.put(sessionId, incomingMedia);
+    }
+
+    public void changeUsername(String username) {
+        this.username = username;
     }
 
     public void changeVideoState(Boolean videoState) {
