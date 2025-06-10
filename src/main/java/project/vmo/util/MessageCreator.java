@@ -138,6 +138,14 @@ public class MessageCreator {
         return audioStateChangeMessage;
     }
 
+    public static JsonObject createChangeUsername(String sessionId, String newUsername) {
+        JsonObject usernameChangeMessage = new JsonObject();
+        usernameChangeMessage.addProperty("action", "changeName");
+        usernameChangeMessage.addProperty("sessionId", sessionId);
+        usernameChangeMessage.addProperty("newUserName", newUsername);
+        return usernameChangeMessage;
+    }
+
     public static JsonObject simple(String action) {
         JsonObject message = new JsonObject();
         message.addProperty("action", action);
