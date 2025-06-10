@@ -100,6 +100,9 @@ public class SignalHandler extends TextWebSocketHandler {
             case VIDEO_STATE_CHANGE:
                 handleVideoStateChange(session, requestMessage);
                 break;
+            case CHANGE_NAME:
+                handleUsernameChange(session, requestMessage);
+                break;
             default:
                 break;
         }
@@ -196,5 +199,12 @@ public class SignalHandler extends TextWebSocketHandler {
         UserSession userSession = sessionRegistry.getBySession(session);
         userSession.changeAudioState(audioState);
         SendService.sendMessage(session, MessageCreator.createAudioStateChangeMessage(SignalEvent.AUDIO_STATE_CHANGE.getValue(), session.getId(), audioState));
+    }
+
+    private void handleUsernameChange(WebSocketSession session, JsonObject jsonMessage) {
+        String newUsername = jsonMessage.get("newUserName").getAsString();
+        UserSession userSession = sessionRegistry.getBySession(session);
+        userSession.changeUsername(newUsername);
+        SendService.sendMessage(session, MessageCreator.createChangeUsername(session.getId(), newUsername));
     }
 }
