@@ -1,4 +1,4 @@
-package project.vmo.Service;
+package project.vmo.service;
 
 import com.google.gson.JsonObject;
 import org.kurento.client.WebRtcEndpoint;

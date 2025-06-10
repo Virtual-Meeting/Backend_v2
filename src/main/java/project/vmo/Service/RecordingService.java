@@ -1,4 +1,4 @@
-package project.vmo.Service;
+package project.vmo.service;
 
 import org.kurento.client.*;
 import org.slf4j.Logger;

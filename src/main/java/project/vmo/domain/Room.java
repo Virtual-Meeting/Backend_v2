@@ -7,7 +7,7 @@ import org.kurento.client.MediaPipeline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import project.vmo.util.RoomIdGenerator;
-import project.vmo.Service.SendService;
+import project.vmo.service.SendService;
 
 import javax.annotation.PreDestroy;
 import java.io.Closeable;

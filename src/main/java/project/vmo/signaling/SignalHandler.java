@@ -1,7 +1,7 @@
 package project.vmo.signaling;
 
 import project.vmo.controller.RecordingDownloadController;
-import project.vmo.Service.*;
+import project.vmo.service.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;

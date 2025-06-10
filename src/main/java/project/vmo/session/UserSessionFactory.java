@@ -4,7 +4,7 @@ import org.kurento.client.MediaPipeline;
 import org.kurento.client.WebRtcEndpoint;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
-import project.vmo.Service.IceCandidateService;
+import project.vmo.service.IceCandidateService;
 import project.vmo.domain.UserSession;
 
 @Component
