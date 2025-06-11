@@ -240,14 +240,22 @@ public class SignalHandler extends TextWebSocketHandler {
         Boolean videoState = jsonMessage.get("videoOn").getAsBoolean();
         UserSession userSession = sessionRegistry.getBySession(session);
         userSession.changeVideoState(videoState);
-        SendService.sendMessage(session, MessageCreator.createVideoStateChangeMessage(SignalEvent.VIDEO_STATE_CHANGE.getValue(), session.getId(), videoState));
+
+        Room room = roomService.getRoomById(userSession.getRoomId());
+        for (UserSession participant : room.getParticipants()) {
+            SendService.sendMessage(participant.getSession(), MessageCreator.createVideoStateChangeMessage(SignalEvent.VIDEO_STATE_CHANGE.getValue(), session.getId(), videoState));
+        }
     }
 
     private void handleAudioStateChange(WebSocketSession session, JsonObject jsonMessage) {
         Boolean audioState = jsonMessage.get("audioOn").getAsBoolean();
         UserSession userSession = sessionRegistry.getBySession(session);
         userSession.changeAudioState(audioState);
-        SendService.sendMessage(session, MessageCreator.createAudioStateChangeMessage(SignalEvent.AUDIO_STATE_CHANGE.getValue(), session.getId(), audioState));
+
+        Room room = roomService.getRoomById(userSession.getRoomId());
+        for (UserSession participant : room.getParticipants()) {
+            SendService.sendMessage(participant.getSession(), MessageCreator.createAudioStateChangeMessage(SignalEvent.AUDIO_STATE_CHANGE.getValue(), session.getId(), audioState));
+        }
     }
 
     private void handleUsernameChange(WebSocketSession session, JsonObject jsonMessage) {
