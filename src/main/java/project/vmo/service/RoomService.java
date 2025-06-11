@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
+import project.vmo.permission.PermissionRepository;
 import project.vmo.util.MessageCreator;
 import project.vmo.domain.UserSession;
 import project.vmo.session.UserSessionFactory;
@@ -16,6 +17,7 @@ import project.vmo.dto.CreateRoomDto;
 import project.vmo.dto.JoinRoomDto;
 import project.vmo.domain.Room;
 
+import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -24,12 +26,15 @@ public class RoomService {
     private final Logger log = LoggerFactory.getLogger(RoomService.class);
     private final KurentoClient kurentoClient;
     private final UserSessionFactory userSessionFactory;
+    private final PermissionRepository permissionRepository;
 
     private final ConcurrentMap<String, Room> rooms = new ConcurrentHashMap<>();
 
-    public RoomService(KurentoClient kurentoClient, UserSessionFactory userSessionFactory) {
+    public RoomService(KurentoClient kurentoClient, UserSessionFactory userSessionFactory,
+                       PermissionRepository permissionRepository) {
         this.kurentoClient = kurentoClient;
         this.userSessionFactory = userSessionFactory;
+        this.permissionRepository = permissionRepository;
     }
 
     public UserSession createRoom(WebSocketSession session, CreateRoomDto dto) {
@@ -58,6 +63,26 @@ public class RoomService {
 
         sendExistingParticipantsList(newUser);
         return newUser;
+    }
+
+    public void leaveRoom(UserSession userSession) {
+        String roomId = userSession.getRoomId();
+        Room room = getRoomById(roomId);
+
+        if (room != null) {
+            try {
+                removeParticipant(userSession);
+                userSession.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        if (room != null && room.getParticipants().isEmpty()) {
+            rooms.remove(roomId);
+            permissionRepository.removeAllPermittedUsers(roomId);
+            RecordingService.deleteRecordings(roomId);
+        }
     }
 
     private void notifyNewUserJoined(UserSession newUser) {
@@ -96,5 +121,30 @@ public class RoomService {
             throw new IllegalArgumentException("존재하지 않는 방입니다. ID: " + roomId);
         }
         return room;
+    }
+
+    private void removeParticipant(UserSession userSession) {
+        permissionRepository.removePermittedUser(userSession.getSession().getId());
+
+        Room room = getRoomById(userSession.getRoomId());
+        room.removeParticipant(userSession.getSession().getId());
+
+        JsonObject participantLeftMessage = MessageCreator.createExitRoomMessage(userSession);
+
+        for (UserSession participant : room.getParticipants()) {
+            ReceiveVideoService.cancelVideo(participant, userSession.getSession().getId());
+            SendService.sendMessage(participant.getSession(), participantLeftMessage);
+        }
+
+        if (room.getLeaderSessionId().equals(userSession.getSession().getId()) && !room.getParticipants().isEmpty()) {
+            UserSession newRoomLeader = room.getRandomParticipant();
+            room.changeRoomLeader(newRoomLeader.getSession().getId(), newRoomLeader.getUsername());
+
+            JsonObject roomLeaderChangeMessage = MessageCreator.createRoomLeaderMessage(room);
+
+            for (final UserSession participant : room.getParticipants()) {
+                SendService.sendMessage(participant.getSession(), roomLeaderChangeMessage);
+            }
+        }
     }
 }
