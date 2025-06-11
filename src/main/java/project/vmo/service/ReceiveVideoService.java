@@ -1,6 +1,7 @@
 package project.vmo.service;
 
 import com.google.gson.JsonObject;
+import org.kurento.client.Continuation;
 import org.kurento.client.WebRtcEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,5 +92,33 @@ public class ReceiveVideoService {
         );
 
         return incomingEndpoint;
+    }
+
+    public static void cancelVideo(UserSession userSession, String senderSessionId) {
+        log.debug("사용자 [{} / {}]가 [{}]로부터 수신 중인 비디오를 취소합니다.",
+                userSession.getUsername(), userSession.getSession().getId(), senderSessionId
+        );
+
+        WebRtcEndpoint incoming = userSession.removeIncomingMedia(senderSessionId);
+
+        log.debug("사용자 [{} / {}]의 [{}]에 대한 WebRtcEndpoint를 해제합니다.",
+                userSession.getUsername(), userSession.getSession().getId(), senderSessionId
+        );
+
+        incoming.release(new Continuation<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                log.trace("사용자 [{} / {}]의 [{}]에 대한 WebRtcEndpoint를 성공적으로 해제했습니다.",
+                        userSession.getUsername(), userSession.getSession().getId(), senderSessionId
+                );
+            }
+
+            @Override
+            public void onError(Throwable cause) {
+                log.warn("사용자 [{} / {}]의 [{}]에 대한 WebRtcEndpoint 해제 실패.",
+                        userSession.getUsername(), userSession.getSession().getId(), senderSessionId
+                );
+            }
+        });
     }
 }
