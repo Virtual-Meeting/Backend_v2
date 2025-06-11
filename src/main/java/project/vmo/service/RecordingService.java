@@ -4,26 +4,25 @@ import org.kurento.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import project.vmo.permission.PermissionRepository;
+import project.vmo.controller.RecordingDownloadController;
 import project.vmo.domain.Room;
 import project.vmo.domain.UserSession;
 import project.vmo.signaling.SignalEvent;
 import project.vmo.util.MessageCreator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
 
 @Service
 public class RecordingService {
     private static final Logger log = LoggerFactory.getLogger(RecordingService.class);
 
     private final RoomService roomService;
+    private final PermissionRepository permissionRepository;
 
-    private final Map<String, String> permittedUser = new HashMap<>();
-
-    public RecordingService(RoomService roomService) {
+    public RecordingService(RoomService roomService, PermissionRepository permissionRepository) {
         this.roomService = roomService;
+        this.permissionRepository = permissionRepository;
     }
 
     public void startRecording(UserSession userSession, String filePath) {
@@ -57,7 +56,7 @@ public class RecordingService {
             SendService.sendMessage(userSession.getSession(), MessageCreator.createStopRecordingMessage(SignalEvent.STOP_RECORDING.getValue(), recorder.getName()));
         }
 
-        deleteRecordingPermission(userSession.getSession().getId());
+        permissionRepository.removePermittedUser(userSession.getSession().getId());
     }
 
     public void pauseRecording(UserSession userSession) {
@@ -78,7 +77,7 @@ public class RecordingService {
 
         validateRecordPermission(sessionId, roomId);
 
-        permittedUser.put(sessionId, roomId);
+        permissionRepository.addPermittedUser(sessionId, roomId);
         SendService.sendMessage(userSession.getSession(), MessageCreator.createGrantPermissionMessage(sessionId));
     }
 
@@ -86,15 +85,19 @@ public class RecordingService {
         Room room = roomService.getRoomById(roomId);
         String roomLeaderId = room.getLeaderSessionId();
 
-        if (permittedUser.containsKey(sessionId) || sessionId.equals(roomLeaderId)) {
+        if (permissionRepository.checkPermittedUser(sessionId) || sessionId.equals(roomLeaderId)) {
             throw new IllegalStateException("이미 녹화 권한이 부여된 사용자입니다.");
         }
 
-        long count = permittedUser.values().stream()
-                .filter(id -> id.equals(roomId))
-                .count();
+        if (permissionRepository.countPermittedUser(roomId) >= 2) throw new IllegalStateException("녹화 권한은 최대 2명까지 부여할 수 있으며, 현재 이미 2명이 권한을 보유하고 있습니다.");
+    }
 
-        if (count >= 2) throw new IllegalStateException("녹화 권한은 최대 2명까지 부여할 수 있으며, 현재 이미 2명이 권한을 보유하고 있습니다.");
+    public static void deleteRecordings(String roomId) {
+        File recordingDir = new File(RecordingDownloadController.RECORDING_DIR + "/" + roomId);
+        File convertedDir = new File(RecordingDownloadController.CONVERTED_DIR + "/" + roomId);
+
+        deleteDirectoryRecursively(recordingDir);
+        deleteDirectoryRecursively(convertedDir);
     }
 
     private void checkRecordingPermission(UserSession userSession) {
@@ -106,12 +109,24 @@ public class RecordingService {
         }
     }
 
-    private void deleteRecordingPermission(String sessionId) {
-        permittedUser.remove(sessionId);
-    }
-
     private boolean isPermittedUser(UserSession userSession) {
         Room room = roomService.getRoomById(userSession.getRoomId());
-        return room.getLeaderSessionId().equals(userSession.getSession().getId()) || permittedUser.containsKey(userSession.getSession().getId());
+        return room.getLeaderSessionId().equals(userSession.getSession().getId()) || permissionRepository.checkPermittedUser(userSession.getSession().getId());
+    }
+
+    private static void deleteDirectoryRecursively(File dir) {
+        if (dir.exists()) {
+            File[] contents = dir.listFiles();
+            if (contents != null) {
+                for (File file : contents) {
+                    if (file.isDirectory()) {
+                        deleteDirectoryRecursively(file);
+                    } else {
+                        file.delete();
+                    }
+                }
+            }
+            dir.delete();
+        }
     }
 }
