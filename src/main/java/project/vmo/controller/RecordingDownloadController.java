@@ -17,7 +17,7 @@ import java.io.IOException;
 public class RecordingDownloadController {
 
     public static final String RECORDING_DIR = "/home/ubuntu/recording/";
-    private static final String CONVERTED_DIR = "/home/ubuntu/recording/converted/";
+    public static final String CONVERTED_DIR = "/home/ubuntu/recording/converted/";
 
     @GetMapping("/{fileName}")
     @CrossOrigin(origins = {
