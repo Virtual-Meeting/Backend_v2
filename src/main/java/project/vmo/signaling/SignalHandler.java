@@ -254,6 +254,10 @@ public class SignalHandler extends TextWebSocketHandler {
         String newUsername = jsonMessage.get("newUserName").getAsString();
         UserSession userSession = sessionRegistry.getBySession(session);
         userSession.changeUsername(newUsername);
-        SendService.sendMessage(session, MessageCreator.createChangeUsername(session.getId(), newUsername));
+
+        Room room = roomService.getRoomById(userSession.getRoomId());
+        for (UserSession participant : room.getParticipants()) {
+            SendService.sendMessage(participant.getSession(), MessageCreator.createChangeUsername(session.getId(), newUsername));
+        }
     }
 }
