@@ -17,7 +17,6 @@ public enum SignalEvent {
     VIDEO_STATE_CHANGE("videoStateChange"),
     START_RECORDING("startRecording"),
     STOP_RECORDING("stopRecording"),
-    SAVE_RECORDING("saveRecording"),
     PAUSE_RECORDING("pauseRecording"),
     RESUME_RECORDING("resumeRecording"),
     REQUEST_RECORDING_PERMISSION("requestRecordingPermission"),
