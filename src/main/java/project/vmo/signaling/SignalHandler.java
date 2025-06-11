@@ -77,6 +77,9 @@ public class SignalHandler extends TextWebSocketHandler {
             case RECEIVE_VIDEO:
                 handleReceiveVideo(session, requestMessage);
                 break;
+            case EXIT_ROOM:
+                handleExitRoom(session);
+                break;
             case SEND_EMOJI:
                 handleSendEmoji(session, requestMessage);
                 break;
@@ -155,6 +158,11 @@ public class SignalHandler extends TextWebSocketHandler {
         if (receiver != null) {
             receiveVideoService.receiveVideo(receiver, sender, jsonMessage);
         }
+    }
+
+    private void handleExitRoom(WebSocketSession session) {
+        UserSession userSession = sessionRegistry.getBySession(session);
+        roomService.leaveRoom(userSession);
     }
 
     private void handleSendEmoji(WebSocketSession session, JsonObject jsonMessage) {
