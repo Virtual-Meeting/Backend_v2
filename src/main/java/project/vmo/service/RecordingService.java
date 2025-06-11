@@ -60,8 +60,6 @@ public class RecordingService {
     }
 
     public void pauseRecording(UserSession userSession) {
-        checkRecordingPermission(userSession);
-
         RecorderEndpoint recorder = userSession.getRecorderEndpoint();
         if (recorder != null) {
             recorder.pause();
@@ -69,6 +67,16 @@ public class RecordingService {
         }
 
         SendService.sendMessage(userSession.getSession(), MessageCreator.simple(SignalEvent.PAUSE_RECORDING.getValue()));
+    }
+
+    public void resumeRecording(UserSession userSession) {
+        RecorderEndpoint recorder = userSession.getRecorderEndpoint();
+        if (recorder != null) {
+            recorder.record();
+            log.info("녹화 재개: {}", userSession.getUsername());
+        }
+
+        SendService.sendMessage(userSession.getSession(), MessageCreator.simple(SignalEvent.RESUME_RECORDING.getValue()));
     }
 
     public void grantRecordingPermission(UserSession userSession) {

@@ -107,6 +107,9 @@ public class SignalHandler extends TextWebSocketHandler {
             case PAUSE_RECORDING:
                 handlePauseRecording(session);
                 break;
+            case RESUME_RECORDING:
+                handleResumeRecording(session);
+                break;
             case AUDIO_STATE_CHANGE:
                 handleAudioStateChange(session, requestMessage);
                 break;
@@ -226,6 +229,11 @@ public class SignalHandler extends TextWebSocketHandler {
     private void handlePauseRecording(WebSocketSession session) {
         UserSession userSession = sessionRegistry.getBySession(session);
         recordingService.pauseRecording(userSession);
+    }
+
+    private void handleResumeRecording(WebSocketSession session) {
+        UserSession userSession = sessionRegistry.getBySession(session);
+        recordingService.resumeRecording(userSession);
     }
 
     private void handleVideoStateChange(WebSocketSession session, JsonObject jsonMessage) {
