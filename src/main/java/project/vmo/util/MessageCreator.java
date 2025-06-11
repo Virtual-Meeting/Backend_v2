@@ -35,6 +35,22 @@ public class MessageCreator {
         return newUserJoinedMessage;
     }
 
+    public static JsonObject createExitRoomMessage(UserSession userSession) {
+        JsonObject participantLeftMessage = new JsonObject();
+        participantLeftMessage.addProperty("action", "exitRoom");
+        participantLeftMessage.addProperty("sessionId", userSession.getSession().getId());
+        participantLeftMessage.addProperty("username", userSession.getUsername());
+        return participantLeftMessage;
+    }
+
+    public static JsonObject createRoomLeaderMessage(Room room) {
+        JsonObject roomLeaderChangeMessage = new JsonObject();
+        roomLeaderChangeMessage.addProperty("action", "leaderChanged");
+        roomLeaderChangeMessage.addProperty("roomLeaderId", room.getLeaderSessionId());
+        roomLeaderChangeMessage.addProperty("roomLeaderName", room.getLeaderName());
+        return roomLeaderChangeMessage;
+    }
+
     public static JsonObject createParticipantInfo(UserSession user) {
         JsonObject participantInfo = new JsonObject();
         participantInfo.addProperty("sessionId", user.getSession().getId());
