@@ -64,6 +64,10 @@ public class UserSession implements Closeable {
         incomingMediaBySessionId.put(sessionId, incomingMedia);
     }
 
+    public WebRtcEndpoint removeIncomingMedia(String sessionId) {
+        return incomingMediaBySessionId.remove(sessionId);
+    }
+
     public void changeUsername(String username) {
         this.username = username;
     }
