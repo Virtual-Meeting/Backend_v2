@@ -12,6 +12,8 @@ import project.vmo.signaling.SignalEvent;
 import project.vmo.util.MessageCreator;
 
 import java.io.File;
+import java.net.URI;
+import java.nio.file.Paths;
 
 @Service
 public class RecordingService {
@@ -28,10 +30,21 @@ public class RecordingService {
     public void startRecording(UserSession userSession, String filePath) {
         checkRecordingPermission(userSession);
 
+        File file = new File(filePath);
+        File parentDir = file.getParentFile();
+        if (!parentDir.exists()) {
+            boolean created = parentDir.mkdirs();
+            if (created) {
+                log.info("녹화 디렉토리 생성됨: {}", parentDir.getAbsolutePath());
+            } else {
+                log.warn("녹화 디렉토리 생성 실패: {}", parentDir.getAbsolutePath());
+            }
+        }
+
         MediaPipeline pipeline = userSession.getPipeline();
         WebRtcEndpoint outgoingMedia = userSession.getOutgoingMedia();
 
-        RecorderEndpoint recorder = new RecorderEndpoint.Builder(pipeline, "file://" + filePath)
+        RecorderEndpoint recorder = new RecorderEndpoint.Builder(pipeline, "file://" + filePath.replace("/home/ubuntu/recording", "/recording"))
                 .withMediaProfile(MediaProfileSpecType.WEBM)
                 .build();
 
@@ -52,8 +65,15 @@ public class RecordingService {
 
         if (recorder != null) {
             recorder.stop();
+            String uri = recorder.getUri();
+            String fileName = Paths.get(URI.create(uri)).getFileName().toString();
+
+            if (fileName.endsWith(".webm.webm")) {
+                fileName = fileName.replace(".webm.webm", ".webm");
+            }
+
             log.info("녹화 중지: {}", userSession.getUsername());
-            SendService.sendMessage(userSession.getSession(), MessageCreator.createStopRecordingMessage(SignalEvent.STOP_RECORDING.getValue(), recorder.getName()));
+            SendService.sendMessage(userSession.getSession(), MessageCreator.createStopRecordingMessage(SignalEvent.STOP_RECORDING.getValue(), fileName));
         }
 
         permissionRepository.removePermittedUser(userSession.getSession().getId());
@@ -102,10 +122,8 @@ public class RecordingService {
 
     public static void deleteRecordings(String roomId) {
         File recordingDir = new File(RecordingDownloadController.RECORDING_DIR + "/" + roomId);
-        File convertedDir = new File(RecordingDownloadController.CONVERTED_DIR + "/" + roomId);
 
         deleteDirectoryRecursively(recordingDir);
-        deleteDirectoryRecursively(convertedDir);
     }
 
     private void checkRecordingPermission(UserSession userSession) {
