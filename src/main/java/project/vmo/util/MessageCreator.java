@@ -140,14 +140,14 @@ public class MessageCreator {
 
     public static JsonObject createGrantPermissionMessage(String sessionId) {
         JsonObject grantPermissionMessage = new JsonObject();
-        grantPermissionMessage.addProperty("action", "grantPermissionMessage");
+        grantPermissionMessage.addProperty("action", "grantRecordingPermission");
         grantPermissionMessage.addProperty("sessionId", sessionId);
         return grantPermissionMessage;
     }
 
     public static JsonObject createDenyPermissionMessage(String sessionId) {
         JsonObject denyPermissionMessage = new JsonObject();
-        denyPermissionMessage.addProperty("action", "denyPermissionMessage");
+        denyPermissionMessage.addProperty("action", "denyRecordingPermission");
         denyPermissionMessage.addProperty("sessionId", sessionId);
         return denyPermissionMessage;
     }
