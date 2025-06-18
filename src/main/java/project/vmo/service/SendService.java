@@ -38,7 +38,7 @@ public class SendService {
         Collection<UserSession> receiverSessions = room.getParticipants();
 
         if (emoji.equals("Raising_Hands")) {
-            senderSession.changeHandRaiseState(!senderSession.getHandRaised());
+            senderSession.changeHandRaiseState(true);
         }
 
         receiverSessions.forEach(receiverSession -> {
