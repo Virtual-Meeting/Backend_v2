@@ -87,7 +87,9 @@ public class UserSession implements Closeable {
     }
 
     public void changeHandRaiseState(Boolean handRaiseState) {
-        handRaised = handRaiseState;
+        if (handRaised != handRaiseState) {
+            handRaised = handRaiseState;
+        } else throw new IllegalStateException("잘못된 손들기 상태 변경 요청입니다.");
     }
 
     @Override
