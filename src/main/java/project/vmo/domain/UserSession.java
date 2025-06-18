@@ -29,6 +29,8 @@ public class UserSession implements Closeable {
     private Boolean isAudioOn;
     @Getter
     private Boolean isVideoOn;
+    @Getter
+    private Boolean handRaised = false;
 
     @Getter
     private final MediaPipeline pipeline;
@@ -82,6 +84,10 @@ public class UserSession implements Closeable {
         if (isAudioOn != audioState) {
             this.isAudioOn = audioState;
         } else throw new IllegalStateException("잘못된 오디오 상태 변경 요청입니다.");
+    }
+
+    public void changeHandRaiseState(Boolean handRaiseState) {
+        handRaised = handRaiseState;
     }
 
     @Override
