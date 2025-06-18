@@ -83,6 +83,9 @@ public class SignalHandler extends TextWebSocketHandler {
             case SEND_EMOJI:
                 handleSendEmoji(session, requestMessage);
                 break;
+            case CANCEL_HAND_RAISE:
+                handleCancelHandRaise(session);
+                break;
             case BROADCAST_CHAT:
                 handleBroadcastChat(session, requestMessage);
                 break;
@@ -97,6 +100,9 @@ public class SignalHandler extends TextWebSocketHandler {
                 break;
             case DENY_RECORDING_PERMISSION:
                 handleDenyRecordingPermission(requestMessage);
+                break;
+            case CONFIRM_RECORDING_CONSENT:
+                handleConfirmRecordingConsent(session);
                 break;
             case START_RECORDING:
                 handleStartRecording(session);
@@ -168,6 +174,16 @@ public class SignalHandler extends TextWebSocketHandler {
         roomService.leaveRoom(userSession);
     }
 
+    private void handleCancelHandRaise(WebSocketSession session) {
+        UserSession userSession = sessionRegistry.getBySession(session);
+        userSession.changeHandRaiseState(false);
+
+        Room room = roomService.getRoomById(userSession.getRoomId());
+        for (UserSession participant : room.getParticipants()) {
+            SendService.sendMessage(participant.getSession(), MessageCreator.createCancelHandRaiseMessage(session.getId()));
+        }
+    }
+
     private void handleSendEmoji(WebSocketSession session, JsonObject jsonMessage) {
         String emoji = jsonMessage.get("emoji").getAsString();
         UserSession senderSession = sessionRegistry.getBySession(session);
@@ -210,6 +226,15 @@ public class SignalHandler extends TextWebSocketHandler {
         String sessionId = jsonMessage.get("sessionId").getAsString();
         UserSession userSession = sessionRegistry.getBySessionId(sessionId);
         SendService.sendMessage(userSession.getSession(), MessageCreator.createDenyPermissionMessage(userSession.getSession().getId()));
+    }
+
+    private void handleConfirmRecordingConsent(WebSocketSession session) {
+        UserSession userSession = sessionRegistry.getBySession(session);
+
+        Room room = roomService.getRoomById(userSession.getRoomId());
+        for (UserSession participant : room.getParticipants()) {
+            SendService.sendMessage(participant.getSession(), MessageCreator.simple(SignalEvent.CONFIRM_RECORDING_CONSENT.getValue()));
+        }
     }
 
     private void handleStartRecording(WebSocketSession session) {
