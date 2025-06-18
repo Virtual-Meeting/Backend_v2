@@ -45,7 +45,7 @@ public class RecordingService {
         SendService.sendMessage(userSession.getSession(), MessageCreator.simple(SignalEvent.START_RECORDING.getValue()));
     }
 
-    public void stopRecording(UserSession userSession) {
+    public void stopRecording(UserSession userSession, UserSession roomLeaderSession) {
         checkRecordingPermission(userSession);
 
         RecorderEndpoint recorder = userSession.getRecorderEndpoint();
@@ -53,10 +53,13 @@ public class RecordingService {
         if (recorder != null) {
             recorder.stop();
             log.info("녹화 중지: {}", userSession.getUsername());
-            SendService.sendMessage(userSession.getSession(), MessageCreator.createStopRecordingMessage(SignalEvent.STOP_RECORDING.getValue(), recorder.getName()));
+            SendService.sendMessage(userSession.getSession(), MessageCreator.createStopRecordingMessage(recorder.getName()));
         }
 
-        permissionRepository.removePermittedUser(userSession.getSession().getId());
+        if (permissionRepository.checkPermittedUser(userSession.getSession().getId())) {
+            permissionRepository.removePermittedUser(userSession.getSession().getId());
+            SendService.sendMessage(roomLeaderSession.getSession(), MessageCreator.createStopRecordingMessage(recorder.getName()));
+        }
     }
 
     public void pauseRecording(UserSession userSession) {
