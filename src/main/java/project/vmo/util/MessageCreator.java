@@ -8,6 +8,7 @@ import org.springframework.web.socket.WebSocketSession;
 import project.vmo.domain.UserSession;
 import project.vmo.dto.CreateRoomDto;
 import project.vmo.domain.Room;
+import project.vmo.signaling.SignalEvent;
 
 import java.io.IOException;
 
@@ -152,24 +153,24 @@ public class MessageCreator {
         return denyPermissionMessage;
     }
 
-    public static JsonObject createStopRecordingMessage(String action, String fileName) {
+    public static JsonObject createStopRecordingMessage(String fileName) {
         JsonObject stopRecordingMessage = new JsonObject();
-        stopRecordingMessage.addProperty("action", action);
+        stopRecordingMessage.addProperty("action", SignalEvent.STOP_RECORDING.getValue());
         stopRecordingMessage.addProperty("fileName", fileName);
         return stopRecordingMessage;
     }
 
-    public static JsonObject createVideoStateChangeMessage(String action, String sessionId, Boolean videoState) {
+    public static JsonObject createVideoStateChangeMessage(String sessionId, Boolean videoState) {
         JsonObject videoStateChangeMessage = new JsonObject();
-        videoStateChangeMessage.addProperty("action", action);
+        videoStateChangeMessage.addProperty("action", SignalEvent.VIDEO_STATE_CHANGE.getValue());
         videoStateChangeMessage.addProperty("sessionId", sessionId);
         videoStateChangeMessage.addProperty("videoOn", videoState);
         return videoStateChangeMessage;
     }
 
-    public static JsonObject createAudioStateChangeMessage(String action, String sessionId, Boolean audioState) {
+    public static JsonObject createAudioStateChangeMessage(String sessionId, Boolean audioState) {
         JsonObject audioStateChangeMessage = new JsonObject();
-        audioStateChangeMessage.addProperty("action", action);
+        audioStateChangeMessage.addProperty("action", SignalEvent.AUDIO_STATE_CHANGE.getValue());
         audioStateChangeMessage.addProperty("sessionId", sessionId);
         audioStateChangeMessage.addProperty("audioOn", audioState);
         return audioStateChangeMessage;
