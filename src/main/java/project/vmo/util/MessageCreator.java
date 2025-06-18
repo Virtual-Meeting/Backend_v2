@@ -112,6 +112,13 @@ public class MessageCreator {
         return emojiMessage;
     }
 
+    public static JsonObject createCancelHandRaiseMessage(String sessionId) {
+        JsonObject cancelHandRaiseMessage = new JsonObject();
+        cancelHandRaiseMessage.addProperty("action", "cancelHandRaise");
+        cancelHandRaiseMessage.addProperty("sessionId", sessionId);
+        return cancelHandRaiseMessage;
+    }
+
     public static JsonObject createBroadcastChatMessage(UserSession senderSession, String message) {
         JsonObject chatMessage = new JsonObject();
         chatMessage.addProperty("action", "broadcastChat");
