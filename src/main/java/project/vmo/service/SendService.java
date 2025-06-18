@@ -37,6 +37,10 @@ public class SendService {
         Room room = roomService.getRoomById(senderSession.getRoomId());
         Collection<UserSession> receiverSessions = room.getParticipants();
 
+        if (emoji.equals("Raising_Hands")) {
+            senderSession.changeHandRaiseState(!senderSession.getHandRaised());
+        }
+
         receiverSessions.forEach(receiverSession -> {
             JsonObject emojiMessage = MessageCreator.createEmojiMessage(senderSession, emoji, receiverSession);
             sendMessage(receiverSession.getSession(), emojiMessage);
