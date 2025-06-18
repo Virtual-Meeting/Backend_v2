@@ -223,7 +223,10 @@ public class SignalHandler extends TextWebSocketHandler {
 
     private void handleStopRecording(WebSocketSession session) {
         UserSession userSession = sessionRegistry.getBySession(session);
-        recordingService.stopRecording(userSession);
+
+        Room room = roomService.getRoomById(userSession.getRoomId());
+        UserSession roomLeaderSession = sessionRegistry.getBySessionId(room.getLeaderSessionId());
+        recordingService.stopRecording(userSession, roomLeaderSession);
     }
 
     private void handlePauseRecording(WebSocketSession session) {
@@ -243,7 +246,7 @@ public class SignalHandler extends TextWebSocketHandler {
 
         Room room = roomService.getRoomById(userSession.getRoomId());
         for (UserSession participant : room.getParticipants()) {
-            SendService.sendMessage(participant.getSession(), MessageCreator.createVideoStateChangeMessage(SignalEvent.VIDEO_STATE_CHANGE.getValue(), session.getId(), videoState));
+            SendService.sendMessage(participant.getSession(), MessageCreator.createVideoStateChangeMessage(session.getId(), videoState));
         }
     }
 
@@ -254,7 +257,7 @@ public class SignalHandler extends TextWebSocketHandler {
 
         Room room = roomService.getRoomById(userSession.getRoomId());
         for (UserSession participant : room.getParticipants()) {
-            SendService.sendMessage(participant.getSession(), MessageCreator.createAudioStateChangeMessage(SignalEvent.AUDIO_STATE_CHANGE.getValue(), session.getId(), audioState));
+            SendService.sendMessage(participant.getSession(), MessageCreator.createAudioStateChangeMessage(session.getId(), audioState));
         }
     }
 
