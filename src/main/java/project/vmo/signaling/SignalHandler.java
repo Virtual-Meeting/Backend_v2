@@ -172,6 +172,7 @@ public class SignalHandler extends TextWebSocketHandler {
     private void handleExitRoom(WebSocketSession session) {
         UserSession userSession = sessionRegistry.getBySession(session);
         roomService.leaveRoom(userSession);
+        sessionRegistry.removeBySession(session);
     }
 
     private void handleCancelHandRaise(WebSocketSession session) {
