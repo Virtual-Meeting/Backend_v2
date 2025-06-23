@@ -38,7 +38,7 @@ public class MessageCreator {
 
     public static JsonObject createExitRoomMessage(UserSession userSession) {
         JsonObject participantLeftMessage = new JsonObject();
-        participantLeftMessage.addProperty("action", "exitRoom");
+        participantLeftMessage.addProperty("action", SignalEvent.EXIT_ROOM.getValue());
         participantLeftMessage.addProperty("sessionId", userSession.getSession().getId());
         participantLeftMessage.addProperty("username", userSession.getUsername());
         return participantLeftMessage;
@@ -76,7 +76,7 @@ public class MessageCreator {
 
     public static JsonObject createCandidateMessage(IceCandidateFoundEvent event, WebSocketSession session, String username) {
         JsonObject candidateMessage = new JsonObject();
-        candidateMessage.addProperty("action", "onIceCandidate");
+        candidateMessage.addProperty("action", SignalEvent.ICE_CANDIDATE.getValue());
         candidateMessage.addProperty("sessionId", session.getId());
         candidateMessage.addProperty("username", username);
         candidateMessage.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
@@ -85,7 +85,7 @@ public class MessageCreator {
 
     public static JsonObject createCandidateMessage(IceCandidateFoundEvent event, UserSession sender) {
         JsonObject candidateMessage = new JsonObject();
-        candidateMessage.addProperty("action", "onIceCandidate");
+        candidateMessage.addProperty("action", SignalEvent.ICE_CANDIDATE.getValue());
         candidateMessage.addProperty("sessionId", sender.getSession().getId());
         candidateMessage.addProperty("username", sender.getUsername());
         candidateMessage.add("candidate", JsonUtils.toJsonObject(event.getCandidate()));
@@ -94,7 +94,7 @@ public class MessageCreator {
 
     public static JsonObject createReceiveVideoMessage(UserSession sender, String sdpAnswer) {
         final JsonObject receiveVideoMessage = new JsonObject();
-        receiveVideoMessage.addProperty("action", "receiveVideoAnswer");
+        receiveVideoMessage.addProperty("action", SignalEvent.RECEIVE_VIDEO.getValue());
         receiveVideoMessage.addProperty("sessionId", sender.getSession().getId());
         receiveVideoMessage.addProperty("username", sender.getUsername());
         receiveVideoMessage.addProperty("sdpAnswer", sdpAnswer);
@@ -103,7 +103,7 @@ public class MessageCreator {
 
     public static JsonObject createEmojiMessage(UserSession senderSession, String emoji, UserSession receiverSession) {
         JsonObject emojiMessage = new JsonObject();
-        emojiMessage.addProperty("action", "sendPublicEmoji");
+        emojiMessage.addProperty("action", SignalEvent.SEND_EMOJI.getValue());
         emojiMessage.addProperty("senderSessionId", senderSession.getSession().getId());
         emojiMessage.addProperty("senderName", senderSession.getUsername());
         emojiMessage.addProperty("receiverSessionId", receiverSession.getSession().getId());
@@ -114,14 +114,14 @@ public class MessageCreator {
 
     public static JsonObject createCancelHandRaiseMessage(String sessionId) {
         JsonObject cancelHandRaiseMessage = new JsonObject();
-        cancelHandRaiseMessage.addProperty("action", "cancelHandRaise");
+        cancelHandRaiseMessage.addProperty("action", SignalEvent.CANCEL_HAND_RAISE.getValue());
         cancelHandRaiseMessage.addProperty("sessionId", sessionId);
         return cancelHandRaiseMessage;
     }
 
     public static JsonObject createBroadcastChatMessage(UserSession senderSession, String message) {
         JsonObject chatMessage = new JsonObject();
-        chatMessage.addProperty("action", "broadcastChat");
+        chatMessage.addProperty("action", SignalEvent.BROADCAST_CHAT.getValue());
         chatMessage.addProperty("senderSessionId", senderSession.getSession().getId());
         chatMessage.addProperty("senderName", senderSession.getUsername());
         chatMessage.addProperty("message", message);
@@ -130,7 +130,7 @@ public class MessageCreator {
 
     public static JsonObject createPersonalChatMessage(UserSession senderSession, UserSession receiverSession, String message) {
         JsonObject chatMessage = new JsonObject();
-        chatMessage.addProperty("action", "sendPersonalChat");
+        chatMessage.addProperty("action", SignalEvent.SEND_PERSONAL_CHAT.getValue());
         chatMessage.addProperty("senderSessionId", senderSession.getSession().getId());
         chatMessage.addProperty("senderName", senderSession.getUsername());
         chatMessage.addProperty("receiverSessionId", receiverSession.getSession().getId());
@@ -141,21 +141,21 @@ public class MessageCreator {
 
     public static JsonObject createPermissionRequestMessage(String sessionId) {
         JsonObject permissionRequestMessage = new JsonObject();
-        permissionRequestMessage.addProperty("action", "requestRecordingPermission");
+        permissionRequestMessage.addProperty("action", SignalEvent.REQUEST_RECORDING_PERMISSION.getValue());
         permissionRequestMessage.addProperty("sessionId", sessionId);
         return permissionRequestMessage;
     }
 
     public static JsonObject createGrantPermissionMessage(String sessionId) {
         JsonObject grantPermissionMessage = new JsonObject();
-        grantPermissionMessage.addProperty("action", "grantPermissionMessage");
+        grantPermissionMessage.addProperty("action", SignalEvent.GRANT_RECORDING_PERMISSION.getValue());
         grantPermissionMessage.addProperty("sessionId", sessionId);
         return grantPermissionMessage;
     }
 
     public static JsonObject createDenyPermissionMessage(String sessionId) {
         JsonObject denyPermissionMessage = new JsonObject();
-        denyPermissionMessage.addProperty("action", "denyPermissionMessage");
+        denyPermissionMessage.addProperty("action", SignalEvent.DENY_RECORDING_PERMISSION.getValue());
         denyPermissionMessage.addProperty("sessionId", sessionId);
         return denyPermissionMessage;
     }
@@ -185,7 +185,7 @@ public class MessageCreator {
 
     public static JsonObject createChangeUsername(String sessionId, String newUsername) {
         JsonObject usernameChangeMessage = new JsonObject();
-        usernameChangeMessage.addProperty("action", "changeName");
+        usernameChangeMessage.addProperty("action", SignalEvent.CHANGE_NAME.getValue());
         usernameChangeMessage.addProperty("sessionId", sessionId);
         usernameChangeMessage.addProperty("newUserName", newUsername);
         return usernameChangeMessage;
