@@ -46,7 +46,12 @@ VMO는 언어뿐 아니라 표정, 제스처, 반응까지 포착하는
 <br><br>
 
 ## 🛠️ 기술 스택
-Spring Boot, Java 17, WebRTC, Kurento
+| 기술 | 버전 |
+| --- | --- |
+| Java | 17 |
+| Spring Boot | 3.4.5 |
+| WebRTC Adapter | 7.4.0 |
+| Kurento Media Server | 6.18.0 |
 <br><br>
 
 ## 📈 기대 효과
