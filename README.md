@@ -54,7 +54,7 @@ VMO는 언어뿐 아니라 표정, 제스처, 반응까지 포착하는
 | WebRTC Adapter | 7.4.0 |
 | Kurento Media Server | 6.18.0 |
 
-<br><br>
+<br>
 
 ## 📈 기대 효과
 ✅ 표현 속도 향상: 말보다 빠른 이모지 반응
