@@ -122,6 +122,9 @@ public class SignalHandler extends TextWebSocketHandler {
             case VIDEO_STATE_CHANGE:
                 handleVideoStateChange(session, requestMessage);
                 break;
+            case MUTE_BY_HOST:
+                handleMuteByHost(session, requestMessage);
+                break;
             case CHANGE_NAME:
                 handleUsernameChange(session, requestMessage);
                 break;
@@ -284,6 +287,19 @@ public class SignalHandler extends TextWebSocketHandler {
         Room room = roomService.getRoomById(userSession.getRoomId());
         for (UserSession participant : room.getParticipants()) {
             SendService.sendMessage(participant.getSession(), MessageCreator.createAudioStateChangeMessage(session.getId(), audioState));
+        }
+    }
+
+    private void handleMuteByHost(WebSocketSession session, JsonObject jsonMessage) {
+        String sessionId = jsonMessage.get("sessionId").getAsString();
+        UserSession userSession = sessionRegistry.getBySessionId(sessionId);
+        userSession.changeAudioState(false);
+
+        Room room = roomService.getRoomById(userSession.getRoomId());
+        if (room.getLeaderSessionId().equals(session.getId())) {
+            for (UserSession participant : room.getParticipants()) {
+                SendService.sendMessage(participant.getSession(), MessageCreator.createMuteByHostMessage(sessionId));
+            }
         }
     }
 

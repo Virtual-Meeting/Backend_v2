@@ -183,6 +183,13 @@ public class MessageCreator {
         return audioStateChangeMessage;
     }
 
+    public static JsonObject createMuteByHostMessage(String sessionId) {
+        JsonObject muteByHostMessage = new JsonObject();
+        muteByHostMessage.addProperty("action", SignalEvent.MUTE_BY_HOST.getValue());
+        muteByHostMessage.addProperty("sessionId", sessionId);
+        return muteByHostMessage;
+    }
+
     public static JsonObject createChangeUsername(String sessionId, String newUsername) {
         JsonObject usernameChangeMessage = new JsonObject();
         usernameChangeMessage.addProperty("action", SignalEvent.CHANGE_NAME.getValue());

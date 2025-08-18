@@ -16,6 +16,7 @@ public enum SignalEvent {
     CHANGE_NAME("changeName"),
     AUDIO_STATE_CHANGE("audioStateChange"),
     VIDEO_STATE_CHANGE("videoStateChange"),
+    MUTE_BY_HOST("mutedByHost"),
     CONFIRM_RECORDING_CONSENT("confirmRecordingConsent"),
     START_RECORDING("startRecording"),
     STOP_RECORDING("stopRecording"),
